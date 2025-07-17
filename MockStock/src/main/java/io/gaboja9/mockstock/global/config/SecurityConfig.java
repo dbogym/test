@@ -22,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthService authService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 

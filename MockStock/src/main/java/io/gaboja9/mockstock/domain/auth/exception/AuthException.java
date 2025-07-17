@@ -36,4 +36,9 @@ public class AuthException extends BaseException {
                 MessageFormat.format(ErrorCode.AUTH_RESEND_TOO_EARLY.getMessage(), seconds);
         return new AuthException(ErrorCode.AUTH_RESEND_TOO_EARLY, message);
     }
+
+    public static AuthException socialLoginRequired(String provider) {
+        String message = MessageFormat.format(ErrorCode.SOCIAL_LOGIN_REQUIRED.getMessage(), provider);
+        return new AuthException(ErrorCode.SOCIAL_LOGIN_REQUIRED, message);
+    }
 }
