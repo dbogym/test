@@ -9,6 +9,19 @@ jobs:
       contents: read
     env:
       PROJECT_DIR: MockStock
+      APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+      INFLUX_TOKEN: ${{ secrets.INFLUX_TOKEN }}
+      HANTU_APPKEY: ${{ secrets.HANTU_APPKEY }}
+      HANTU_APPSECRET: ${{ secrets.HANTU_APPSECRET }}
+      KAKAO_SECRET_KEY: ${{ secrets.KAKAO_SECRET_KEY }}
+      KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+      KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+      NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+      NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      JWT_ORIGIN_KEY: ${{ secrets.JWT_ORIGIN_KEY }}
+      JWT_APP_KEY: ${{ secrets.JWT_APP_KEY }}
     steps:
       - uses: actions/checkout@v4
 

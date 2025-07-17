@@ -38,3 +38,6 @@ out/
 
 docker-compose.yml
 src/main/resources/application-dev.yml
+/grafana/
+/prometheus
+nginx.conf

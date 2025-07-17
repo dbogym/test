@@ -16,6 +16,8 @@ public class Portfolios extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String stockName;
+
     private String stockCode;
 
     private int quantity;
@@ -24,7 +26,16 @@ public class Portfolios extends BaseEntity {
 
     private boolean deleted = false;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "members_id")
     private Members members;
+
+    // 테스트용 생성자
+    public Portfolios(Long id, String stockCode, String stockName, int quantity, int avgPrice) {
+        this.id = id;
+        this.stockCode = stockCode;
+        this.stockName = stockName;
+        this.quantity = quantity;
+        this.avgPrice = avgPrice;
+    }
 }
