@@ -1,7 +1,5 @@
 package io.gaboja9.mockstock.global.config;
 
-import io.gaboja9.mockstock.domain.auth.service.AuthService;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;

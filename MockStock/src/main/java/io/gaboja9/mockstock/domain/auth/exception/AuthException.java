@@ -38,7 +38,8 @@ public class AuthException extends BaseException {
     }
 
     public static AuthException socialLoginRequired(String provider) {
-        String message = MessageFormat.format(ErrorCode.SOCIAL_LOGIN_REQUIRED.getMessage(), provider);
+        String message =
+                MessageFormat.format(ErrorCode.SOCIAL_LOGIN_REQUIRED.getMessage(), provider);
         return new AuthException(ErrorCode.SOCIAL_LOGIN_REQUIRED, message);
     }
 }
