@@ -5,9 +5,13 @@ import io.gaboja9.mockstock.domain.auth.exception.AuthException;
 import io.gaboja9.mockstock.domain.auth.repository.EmailVerificationRepository;
 import io.gaboja9.mockstock.domain.members.repository.MembersRepository;
 
+import jakarta.mail.internet.MimeMessage;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +28,7 @@ public class EmailVerificationService {
 
     private final EmailVerificationRepository emailVerificationRepository;
     private final MembersRepository membersRepository;
+    private final JavaMailSender mailSender;
 
     private static final int VERIFICATION_CODE_LENGTH = 6;
     private static final int VERIFICATION_CODE_EXPIRY_MINUTES = 5;
@@ -31,12 +36,27 @@ public class EmailVerificationService {
 
     // 이메일 발송
     private void sendEmail(String email, String verificationCode) {
-        // TODO: 실제 이메일 발송 로직 구현
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        log.info("==이메일 발송==");
-        log.info("수신자: {}", email);
-        log.info("제목: MockStock 회원가입 인증코드");
-        log.info("내용: 인증코드는 [{}]입니다. 5분 내에 입력해주세요.", verificationCode);
+            helper.setTo(email);
+            helper.setSubject("MockStock 회원가입 인증코드");
+            helper.setText(
+                    String.format(
+                            "안녕하세요!\n\n"
+                                    + "MockStock 회원가입 인증코드는 다음과 같습니다:\n\n"
+                                    + "인증코드: %s\n\n"
+                                    + "5분 내에 인증을 완료해주세요.\n\n"
+                                    + "감사합니다.",
+                            verificationCode));
+
+            mailSender.send(message);
+            log.info("이메일 발송 성공: {}", email);
+        } catch (Exception e) {
+            log.error("이메일 발송 실패: {}", email, e);
+            throw new RuntimeException("이메일 발송에 실패했습니다.");
+        }
     }
 
     // 인증코드 발송 (재발송도 고려..)

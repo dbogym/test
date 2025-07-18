@@ -31,7 +31,7 @@ public class FormAuthService {
     public void signUp(SignUpRequestDto dto) {
 
         // 이메일 중복 확인
-        if (!emailCheck(dto.getEmail())) {
+        if (emailCheck(dto.getEmail())) {
             throw AuthException.emailAlreadyExists();
         }
 
@@ -64,7 +64,7 @@ public class FormAuthService {
     }
 
     // form 로그인
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenPair login(LoginRequestDto dto) {
         log.info("로그인 시도: {}", dto.getEmail());
 

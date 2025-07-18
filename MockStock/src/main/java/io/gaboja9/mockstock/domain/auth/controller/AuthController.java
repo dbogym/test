@@ -5,13 +5,13 @@ import io.gaboja9.mockstock.domain.auth.dto.request.EmailVerificationRequestDto;
 import io.gaboja9.mockstock.domain.auth.dto.request.LoginRequestDto;
 import io.gaboja9.mockstock.domain.auth.dto.request.SignUpRequestDto;
 import io.gaboja9.mockstock.domain.auth.dto.response.AuthResponseDto;
-import io.gaboja9.mockstock.domain.auth.repository.EmailVerificationRepository;
-import io.gaboja9.mockstock.domain.auth.service.AuthService;
 import io.gaboja9.mockstock.domain.auth.service.EmailVerificationService;
 import io.gaboja9.mockstock.domain.auth.service.FormAuthService;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,7 +47,7 @@ public class AuthController {
 
         TokenPair tokenPair = formAuthService.login(loginRequestDto);
 
-        return ResponseEntity.ok(AuthResponseDto.success("로그인이 완려되었습니다.", tokenPair));
+        return ResponseEntity.ok(AuthResponseDto.success("로그인이 완료되었습니다.", tokenPair));
     }
 
     @PostMapping("/email")

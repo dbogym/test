@@ -23,7 +23,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,8 +58,9 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         this.session = session;
         eventService.setSession(session);
-        log.info(
-                "WebSocket connection established at {}: {}", LocalDateTime.now(), session.getId());
+        //        log.info(
+        //                "WebSocket connection established at {}: {}", LocalDateTime.now(),
+        // session.getId());
 
         // 접속 승인키 얻기
         approvalKey = getApprovalKey();
@@ -80,7 +80,7 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
 
     /** 애플리케이션 시작 시 구독할 초기 종목들을 설정합니다. */
     private void subscribeInitialStocks() {
-        log.info("Subscribing to initial stocks...");
+        //        log.info("Subscribing to initial stocks...");
         // 삼성전자, 카카오, 네이버를 순서대로 구독 요청
         subscribeStockPrice("005930", "H1"); // 삼성전자
         subscribeStockPrice("035720", "H1"); // 카카오
@@ -99,11 +99,11 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
     // 연결 종료시 호출
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        log.info(
-                "WebSocket connection closed at {}: {}, status: {}",
-                LocalDateTime.now(),
-                session.getId(),
-                status);
+        //        log.info(
+        //                "WebSocket connection closed at {}: {}, status: {}",
+        //                LocalDateTime.now(),
+        //                session.getId(),
+        //                status);
         this.session = null;
         eventService.setConnectionActive(false);
         eventService.setSession(null);
@@ -112,7 +112,7 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
     // 에러 발생시 호출
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        log.error("WebSocket transport error in session {}", session.getId(), exception);
+        //        log.error("WebSocket transport error in session {}", session.getId(), exception);
         eventService.setConnectionActive(false);
     }
 
@@ -143,14 +143,14 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
             if (response.getStatusCode() == HttpStatus.OK) {
                 JsonNode rootNode = objectMapper.readTree(response.getBody());
                 approvalKey = rootNode.get("approval_key").asText();
-                log.info("Approval key obtained: {}", approvalKey);
+                //                log.info("Approval key obtained: {}", approvalKey);
                 return approvalKey;
             } else {
                 throw new RuntimeException(
                         "Failed to obtain approval key. Status code: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            log.error("Error getting approval key", e);
+            //            log.error("Error getting approval key", e);
             throw new RuntimeException("Failed to obtain approval key", e);
         }
     }
@@ -158,7 +158,7 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
     // 실시간체결가 구독
     public void subscribeStockPrice(String stockCode, String marketCode) {
         if (session == null || !session.isOpen()) {
-            log.warn("WebSocket not connected. Cannot subscribe to {}", stockCode);
+            //            log.warn("WebSocket not connected. Cannot subscribe to {}", stockCode);
             return;
         }
 
@@ -183,16 +183,16 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
             String requestJson = objectMapper.writeValueAsString(request);
             session.sendMessage(new TextMessage(requestJson));
             subscribedStocks.put(stockCode, marketCode);
-            log.info("Subscription request sent for stock: {}", stockCode);
+            //            log.info("Subscription request sent for stock: {}", stockCode);
         } catch (Exception e) {
-            log.error("Error subscribing to stock price for code: {}", stockCode, e);
+            //            log.error("Error subscribing to stock price for code: {}", stockCode, e);
         }
     }
 
     /** 실시간 시세 구독 해제 */
     public void unsubscribeStockPrice(String stockCode, String marketCode) {
         if (session == null || !session.isOpen()) {
-            log.warn("WebSocket not connected. Cannot unsubscribe.");
+            //            log.warn("WebSocket not connected. Cannot unsubscribe.");
             return;
         }
 
@@ -217,9 +217,10 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
             String requestJson = objectMapper.writeValueAsString(request);
             session.sendMessage(new TextMessage(requestJson));
             subscribedStocks.remove(stockCode);
-            log.info("Unsubscribed from real-time price for stock: {}", stockCode);
+            //            log.info("Unsubscribed from real-time price for stock: {}", stockCode);
         } catch (Exception e) {
-            log.error("Error unsubscribing from stock price for code: {}", stockCode, e);
+            //            log.error("Error unsubscribing from stock price for code: {}", stockCode,
+            // e);
         }
     }
 
@@ -231,10 +232,10 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
                 if (parts.length >= 4) {
                     String[] fields = parts[3].split("\\^");
                     StockPrice priceData = StockPriceMapper.parseStockPriceData(fields);
-                    log.info(priceData.toString());
+                    //                    log.info(priceData.toString());
                 }
             } catch (Exception e) {
-                log.error("Error processing real-time data: {}", message, e);
+                //                log.error("Error processing real-time data: {}", message, e);
             }
             return;
         }
@@ -246,7 +247,8 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
                 String trId = header.has("tr_id") ? header.get("tr_id").asText() : "";
                 // pingpong이 왔을때 그대로 보내준다.
                 if ("PINGPONG".equals(trId)) {
-                    log.debug("PINGPONG check received from server. Sending response.");
+                    //                    log.debug("PINGPONG check received from server. Sending
+                    // response.");
                     // 받은 메시지를 그대로 다시 보내주는 것이 가장 간단하고 확실한 응답 방식
                     session.sendMessage(new TextMessage(message));
                     return; // 응답 후 처리 종료
@@ -256,15 +258,15 @@ public class HantuWebSocketHandler extends TextWebSocketHandler {
                 if (rootNode.has("body")) {
                     JsonNode body = rootNode.get("body");
                     if (body.has("msg_cd")) {
-                        log.info(
-                                "Response received: [{}], {}",
-                                body.get("msg_cd").asText(),
-                                body.get("msg1").asText());
+                        //                        log.info(
+                        //                                "Response received: [{}], {}",
+                        //                                body.get("msg_cd").asText(),
+                        //                                body.get("msg1").asText());
                     }
                 }
             }
         } catch (Exception e) {
-            log.warn("Could not parse JSON message: {}", message, e);
+            //            log.warn("Could not parse JSON message: {}", message, e);
         }
     }
 
