@@ -82,6 +82,5 @@ public class Members extends BaseEntity {
         this.cashBalance = cashBalance;
         this.bankruptcyCnt = bankruptcyCnt;
         this.setCreatedAt(createdAt);
-        this.password = null;
     }
 }

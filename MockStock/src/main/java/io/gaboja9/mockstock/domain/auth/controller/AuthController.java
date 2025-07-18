@@ -10,10 +10,8 @@ import io.gaboja9.mockstock.domain.auth.entity.RefreshToken;
 import io.gaboja9.mockstock.domain.auth.repository.TokenRepository;
 import io.gaboja9.mockstock.domain.auth.service.EmailVerificationService;
 import io.gaboja9.mockstock.domain.auth.service.FormAuthService;
-
 import io.gaboja9.mockstock.domain.auth.service.JwtTokenProvider;
-import io.gaboja9.mockstock.domain.members.entity.Members;
-import io.gaboja9.mockstock.domain.members.repository.MembersRepository;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

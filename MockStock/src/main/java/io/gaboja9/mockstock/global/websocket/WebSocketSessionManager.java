@@ -17,10 +17,10 @@ public class WebSocketSessionManager {
     public void setSession(WebSocketSession session) {
         this.session = session;
         this.connectionActive = (session != null && session.isOpen());
-        log.info(
-                "WebSocket session set: {}, active: {}",
-                session != null ? session.getId() : "null",
-                connectionActive);
+        //        log.info(
+        //                "WebSocket session set: {}, active: {}",
+        //                session != null ? session.getId() : "null",
+        //                connectionActive);
     }
 
     // 연결 상태 설정

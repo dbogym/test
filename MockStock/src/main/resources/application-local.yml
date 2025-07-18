@@ -127,7 +127,7 @@ custom:
       base: https://mock-stock.pages.dev/
 
     validation:
-      access: 100000
+      access: 600000
       refresh: 86400000
 
     secrets:
