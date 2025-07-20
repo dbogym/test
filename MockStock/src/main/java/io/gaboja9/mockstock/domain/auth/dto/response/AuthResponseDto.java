@@ -32,6 +32,6 @@ public class AuthResponseDto {
     }
 
     public static AuthResponseDto fail(String message) {
-        return AuthResponseDto.builder().success(true).message(message).build();
+        return AuthResponseDto.builder().success(false).message(message).build();
     }
 }

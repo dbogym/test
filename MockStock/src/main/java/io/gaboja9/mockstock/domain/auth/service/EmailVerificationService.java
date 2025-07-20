@@ -90,7 +90,7 @@ public class EmailVerificationService {
     }
 
     // 인증코드 검증
-    @Transactional(readOnly = true)
+    @Transactional
     public boolean verifyCode(String email, String code) {
         Optional<EmailVerification> verificationOpt =
                 emailVerificationRepository.findByEmailAndVerificationCodeAndVerifiedFalse(

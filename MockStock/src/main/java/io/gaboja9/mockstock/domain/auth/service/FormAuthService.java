@@ -100,7 +100,7 @@ public class FormAuthService {
         Optional<Members> member = membersRepository.findByEmail(email);
 
         if (!"LOCAL".equals(member.get().getProvider())) {
-            throw new IllegalStateException("소셜 로그인 계정은 비밀번호 재설정아 불가능합니다.");
+            throw new IllegalStateException("소셜 로그인 계정은 비밀번호 재설정이 불가능합니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(newPassword);
