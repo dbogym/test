@@ -13,11 +13,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class WebSocketSessionManager {
 
-    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    @Getter private WebSocketSession session;
+    private boolean connectionActive = false;
 
-    public void registerSession(WebSocketSession session) {
-        sessions.put(session.getId(), session);
-        log.info("Session registered: {}", session.getId());
+    // 세션설정
+    public void setSession(WebSocketSession session) {
+        this.session = session;
+        this.connectionActive = (session != null && session.isOpen());
+        //        log.info(
+        //                "WebSocket session set: {}, active: {}",
+        //                session != null ? session.getId() : "null",
+        //                connectionActive);
     }
 
     // 연결이 이미 닫힌 후 호출되는 cleanup 메서드

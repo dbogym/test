@@ -103,4 +103,41 @@ public class JwtTokenProvider {
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtConfiguration.getSecrets().getAppKey().getBytes());
     }
+
+    public String refreshAccessToken(String refreshToken) {
+        if (!validate(refreshToken)) {
+            throw JwtAuthenticationException.invalid();
+        }
+
+        TokenBody tokenBody = parseJwt(refreshToken);
+        Long memberId = tokenBody.getMemberId();
+
+        RefreshToken validRefreshToken =
+                tokenRepository
+                        .findValidRefreshToken(memberId)
+                        .orElseThrow(
+                                () -> {
+                                    log.warn(
+                                            "사용자 ID {}의 유효한 RefreshToken을 찾을 수 없음 (블랙리스트 포함)",
+                                            memberId);
+                                    return JwtAuthenticationException.invalid();
+                                });
+
+        if (!validRefreshToken.getRefreshToken().equals(refreshToken)) {
+            log.warn("사용자 ID {}의 RefreshToken이 DB와 일치하지 않음", memberId);
+            throw JwtAuthenticationException.invalid();
+        }
+
+        String newAccessToken = issueAcceessToken(memberId, tokenBody.getRole());
+        log.info("사용자 ID {}의 AccessToken 갱신 완료", memberId);
+
+        return newAccessToken;
+    }
+
+    public String extractTokenFromHeader(String authorization) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("잘못된 인증 헤더");
+        }
+        return authorization.substring(7);
+    }
 }
