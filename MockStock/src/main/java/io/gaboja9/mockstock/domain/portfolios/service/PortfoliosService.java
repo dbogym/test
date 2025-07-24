@@ -7,6 +7,7 @@ import io.gaboja9.mockstock.domain.portfolios.dto.PortfoliosSummary;
 import io.gaboja9.mockstock.domain.portfolios.dto.response.PortfolioResponseDto;
 import io.gaboja9.mockstock.domain.portfolios.dto.response.PortfoliosResponseDto;
 import io.gaboja9.mockstock.domain.portfolios.entity.Portfolios;
+import io.gaboja9.mockstock.domain.portfolios.exception.NotFoundPortfolioException;
 import io.gaboja9.mockstock.domain.portfolios.mapper.PortfoliosMapper;
 import io.gaboja9.mockstock.domain.portfolios.repository.PortfoliosRepository;
 
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +86,47 @@ public class PortfoliosService {
                         .orElseThrow(() -> new NotFoundMemberException(memberId));
 
         portfoliosRepository.deleteByMembersId(findMember.getId());
+    }
+
+    @Transactional
+    public void updateForBuy(
+            Long memberId, String stockCode, String stockName, int quantity, int price) {
+
+        Members member =
+                membersRepository
+                        .findById(memberId)
+                        .orElseThrow(() -> new NotFoundMemberException(memberId));
+
+        Optional<Portfolios> optionalPortfolios =
+                portfoliosRepository.findByMembersIdAndStockCode(memberId, stockCode);
+
+        if (optionalPortfolios.isPresent()) {
+            // 기존에 매수한 동일 주식이 있는 경우 평균단가 업데이트
+            Portfolios portfolio = optionalPortfolios.get();
+            portfolio.updateForBuy(quantity, price);
+            portfoliosRepository.save(portfolio);
+        } else {
+            // 아닌 경우 새로운 포트폴리오 생성
+            Portfolios newPortfolio = new Portfolios(stockCode, stockName, quantity, price, member);
+            portfoliosRepository.save(newPortfolio);
+        }
+    }
+
+    @Transactional
+    public void updateForSell(Long memberId, String stockCode, int quantity) {
+        membersRepository
+                .findById(memberId)
+                .orElseThrow(() -> new NotFoundMemberException(memberId));
+
+        Portfolios portfolio =
+                portfoliosRepository
+                        .findByMembersIdAndStockCode(memberId, stockCode)
+                        .orElseThrow(() -> new NotFoundPortfolioException());
+
+        portfolio.updateForSell(quantity);
+
+        if (portfolio.getQuantity() == 0) {
+            portfoliosRepository.delete(portfolio);
+        }
     }
 }

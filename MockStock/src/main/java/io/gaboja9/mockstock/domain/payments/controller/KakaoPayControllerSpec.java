@@ -1,16 +1,19 @@
 package io.gaboja9.mockstock.domain.payments.controller;
 
+import io.gaboja9.mockstock.domain.auth.dto.MembersDetails;
 import io.gaboja9.mockstock.domain.payments.dto.PaymentRequest;
 import io.gaboja9.mockstock.domain.payments.dto.PaymentResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,7 +31,27 @@ public interface KakaoPayControllerSpec {
                         responseCode = "200",
                         description = "결제 준비 성공",
                         content =
-                                @Content(schema = @Schema(implementation = PaymentResponse.class))),
+                                @Content(
+                                        schema = @Schema(implementation = PaymentResponse.class),
+                                        examples =
+                                                @ExampleObject(
+                                                        name = "결제 준비 성공",
+                                                        value =
+                                                                """
+                                                                        {
+                                                                            "success": true,
+                                                                            "message": "결제 준비 완료",
+                                                                            "data": {
+                                                                                "tid": "T87734d3620347052c46",
+                                                                                "next_redirect_pc_url": "https://online-payment.kakaopay.com/mockup/bridge/pc/pg/one-time/payment/bcd3325a4ea71ed80c6056c4134c88987c1705066247638c9fea68b507ccd57e",
+                                                                                "next_redirect_mobile_url": "https://online-payment.kakaopay.com/mockup/bridge/mobile-web/pg/one-time/payment/bcd3325a4ea71ed80c6056c4134c88987c1705066247638c9fea68b507ccd57e",
+                                                                                "next_redirect_app_url": "https://online-payment.kakaopay.com/mockup/bridge/mobile-app/pg/one-time/payment/bcd3325a4ea71ed80c6056c4134c88987c1705066247638c9fea68b507ccd57e",
+                                                                                "android_app_scheme": "kakaotalk://kakaopay/pg?url=https://online-pay.kakaopay.com/pay/mockup/bcd3325a4ea71ed80c6056c4134c88987c1705066247638c9fea68b507ccd57e",
+                                                                                "ios_app_scheme": "kakaotalk://kakaopay/pg?url=https://online-pay.kakaopay.com/pay/mockup/bcd3325a4ea71ed80c6056c4134c88987c1705066247638c9fea68b507ccd57e",
+                                                                                "created_at": "2025-07-16T14:12:51"
+                                                                            }
+                                                                        }
+                                                                """))),
                 @ApiResponse(
                         responseCode = "400",
                         description = "잘못된 요청",
@@ -37,7 +60,8 @@ public interface KakaoPayControllerSpec {
             })
     ResponseEntity<PaymentResponse> paymentReady(
             @Parameter(description = "결제 요청 정보", required = true) @RequestBody
-                    PaymentRequest request);
+                    PaymentRequest request,
+            @AuthenticationPrincipal MembersDetails membersDetails);
 
     @Operation(summary = "결제 승인", description = "카카오페이 결제를 승인합니다.")
     @ApiResponses(

@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import io.gaboja9.mockstock.domain.members.entity.Members;
 import io.gaboja9.mockstock.domain.members.exception.NotFoundMemberException;
@@ -13,6 +12,7 @@ import io.gaboja9.mockstock.domain.members.repository.MembersRepository;
 import io.gaboja9.mockstock.domain.portfolios.dto.response.PortfolioResponseDto;
 import io.gaboja9.mockstock.domain.portfolios.dto.response.PortfoliosResponseDto;
 import io.gaboja9.mockstock.domain.portfolios.entity.Portfolios;
+import io.gaboja9.mockstock.domain.portfolios.exception.NotFoundPortfolioException;
 import io.gaboja9.mockstock.domain.portfolios.mapper.PortfoliosMapper;
 import io.gaboja9.mockstock.domain.portfolios.repository.PortfoliosRepository;
 
@@ -53,8 +53,8 @@ class PortfoliosServiceTest {
                         0,
                         LocalDateTime.now().minusDays(15));
 
-        Portfolios p1 = new Portfolios(1L, "AAPL", "애플", 10, 150);
-        Portfolios p2 = new Portfolios(2L, "TSLA", "테슬라", 5, 200);
+        Portfolios p1 = new Portfolios("AAPL", "애플", 10, 150, member);
+        Portfolios p2 = new Portfolios("TSLA", "테슬라", 5, 200, member);
 
         List<Portfolios> portfoliosList = Arrays.asList(p1, p2);
 
@@ -149,5 +149,168 @@ class PortfoliosServiceTest {
         assertThrows(NotFoundMemberException.class, () -> portfoliosService.remove(memberId));
 
         verify(portfoliosRepository, never()).deleteByMembersId(any());
+    }
+
+    @Test
+    void updateForBuy_기존보유종목_평균단가갱신() {
+        // given
+        Long memberId = 1L;
+        String stockCode = "AAPL";
+        String stockName = "애플";
+        int quantity = 5;
+        int price = 200;
+
+        Members member =
+                new Members(
+                        memberId,
+                        "test@example.com",
+                        "testUser",
+                        "google",
+                        "profile.png",
+                        30000000,
+                        0,
+                        LocalDateTime.now());
+
+        Portfolios portfolio = new Portfolios(stockCode, stockName, 10, 150, member);
+
+        given(membersRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(portfoliosRepository.findByMembersIdAndStockCode(memberId, stockCode))
+                .willReturn(Optional.of(portfolio));
+
+        // when
+        portfoliosService.updateForBuy(memberId, stockCode, stockName, quantity, price);
+
+        // then
+        assertThat(portfolio.getQuantity()).isEqualTo(15);
+        assertThat(portfolio.getAvgPrice()).isEqualTo((10 * 150 + 5 * 200) / 15);
+        verify(portfoliosRepository).save(portfolio);
+    }
+
+    @Test
+    void updateForBuy_새로운종목_포트폴리오생성() {
+        // given
+        Long memberId = 1L;
+        String stockCode = "GOOG";
+        String stockName = "구글";
+        int quantity = 3;
+        int price = 180;
+
+        Members member =
+                new Members(
+                        memberId,
+                        "test@example.com",
+                        "testUser",
+                        "google",
+                        "profile.png",
+                        30000000,
+                        0,
+                        LocalDateTime.now());
+
+        given(membersRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(portfoliosRepository.findByMembersIdAndStockCode(memberId, stockCode))
+                .willReturn(Optional.empty());
+
+        // when
+        portfoliosService.updateForBuy(memberId, stockCode, stockName, quantity, price);
+
+        // then
+        verify(portfoliosRepository).save(any(Portfolios.class));
+    }
+
+    @Test
+    void updateForSell_수량감소() {
+        // given
+        Long memberId = 1L;
+        String stockCode = "AAPL";
+        int quantityToSell = 5;
+
+        Members member =
+                new Members(
+                        memberId,
+                        "test@example.com",
+                        "testUser",
+                        "google",
+                        "profile.png",
+                        30000000,
+                        0,
+                        LocalDateTime.now());
+
+        Portfolios portfolio = new Portfolios(stockCode, "애플", 10, 150, member);
+
+        given(membersRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(portfoliosRepository.findByMembersIdAndStockCode(memberId, stockCode))
+                .willReturn(Optional.of(portfolio));
+
+        // when
+        portfoliosService.updateForSell(memberId, stockCode, quantityToSell);
+
+        // then
+        assertThat(portfolio.getQuantity()).isEqualTo(5);
+        verify(portfoliosRepository, never()).delete(any());
+        verify(portfoliosRepository, never()).save(any());
+    }
+
+    @Test
+    void updateForSell_전량매도_삭제확인() {
+        // given
+        Long memberId = 1L;
+        String stockCode = "AAPL";
+        int quantityToSell = 10;
+
+        Members member =
+                new Members(
+                        memberId,
+                        "test@example.com",
+                        "testUser",
+                        "google",
+                        "profile.png",
+                        30000000,
+                        0,
+                        LocalDateTime.now());
+
+        Portfolios portfolio = new Portfolios(stockCode, "애플", 10, 150, member);
+
+        given(membersRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(portfoliosRepository.findByMembersIdAndStockCode(memberId, stockCode))
+                .willReturn(Optional.of(portfolio));
+
+        // when
+        portfoliosService.updateForSell(memberId, stockCode, quantityToSell);
+
+        // then
+        assertThat(portfolio.getQuantity()).isEqualTo(0);
+        verify(portfoliosRepository).delete(portfolio);
+    }
+
+    @Test
+    void updateForSell_보유주식_없을경우() {
+        // given
+        Long memberId = 1L;
+        String stockCode = "AAPL";
+        int quantity = 5;
+
+        // 멤버는 존재
+        Members member =
+                new Members(
+                        memberId,
+                        "test@example.com",
+                        "testUser",
+                        "google",
+                        "profile.png",
+                        30000000,
+                        0,
+                        LocalDateTime.now());
+        when(membersRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // 포트폴리오는 없음
+        when(portfoliosRepository.findByMembersIdAndStockCode(memberId, stockCode))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(
+                NotFoundPortfolioException.class,
+                () -> {
+                    portfoliosService.updateForSell(memberId, stockCode, quantity);
+                });
     }
 }

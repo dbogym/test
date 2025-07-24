@@ -1,7 +1,9 @@
 package io.gaboja9.mockstock.domain.stock.controller;
 
+import io.gaboja9.mockstock.domain.stock.dto.StockResponse;
 import io.gaboja9.mockstock.domain.stock.service.DailyStockService;
 import io.gaboja9.mockstock.domain.stock.service.MinuteStockService;
+import io.gaboja9.mockstock.domain.stock.service.StocksService;
 import io.gaboja9.mockstock.domain.stock.service.TodayMinuteStockService;
 
 import lombok.RequiredArgsConstructor;
@@ -14,16 +16,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /** 주식 데이터 수집을 위한 컨트롤러 */
 @Slf4j
 @RestController
 @RequestMapping("/api/stocks")
 @RequiredArgsConstructor
-public class StockController {
+public class StockController implements StockControllerSpec {
 
-    private final DailyStockService stockService;
+    private final DailyStockService dailyStockService;
     private final MinuteStockService minuteStockService;
     private final TodayMinuteStockService todayMinuteStockService;
+    private final StocksService stocksService;
 
     @GetMapping("/fetch-data")
     public ResponseEntity<?> fetchStockData(
@@ -36,7 +41,8 @@ public class StockController {
         log.info("주식 데이터 수집 요청: {}, 기간: {} ~ {}", stockCode, startDate, endDate);
 
         // 단일 종목 처리용 서비스 호출
-        stockService.fetchAndSaveDailyData(marketCode, stockCode, startDate, endDate, periodCode);
+        dailyStockService.fetchAndSaveDailyData(
+                marketCode, stockCode, startDate, endDate, periodCode);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("데일리 주식 저장 완료");
     }
@@ -64,5 +70,10 @@ public class StockController {
         todayMinuteStockService.fetchAndSaveCurrentDayMinuteData(
                 marketCode, stockCode, startTime, periodCode, clsCode);
         return ResponseEntity.status(HttpStatus.CREATED).body("분 주식 저장 완료");
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<StockResponse>> getAllStocks() {
+        return ResponseEntity.ok(stocksService.getAllStocks());
     }
 }

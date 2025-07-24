@@ -1,6 +1,7 @@
 package io.gaboja9.mockstock.domain.portfolios.entity;
 
 import io.gaboja9.mockstock.domain.members.entity.Members;
+import io.gaboja9.mockstock.domain.orders.exception.InvalidSellQuantityException;
 import io.gaboja9.mockstock.global.common.BaseEntity;
 
 import jakarta.persistence.*;
@@ -30,12 +31,34 @@ public class Portfolios extends BaseEntity {
     @JoinColumn(name = "members_id")
     private Members members;
 
-    // 테스트용 생성자
-    public Portfolios(Long id, String stockCode, String stockName, int quantity, int avgPrice) {
-        this.id = id;
+    public Portfolios(
+            String stockCode, String stockName, int quantity, int avgPrice, Members members) {
         this.stockCode = stockCode;
         this.stockName = stockName;
         this.quantity = quantity;
         this.avgPrice = avgPrice;
+        this.members = members;
+    }
+
+    public void updateForBuy(int additionalQuantity, int buyPrice) {
+        int currentInvestment = this.quantity * this.avgPrice;
+
+        int additionalInvestment = additionalQuantity * buyPrice;
+
+        int newQuantity = this.quantity + additionalQuantity;
+
+        int newAvgPrice = (currentInvestment + additionalInvestment) / newQuantity;
+
+        this.quantity = newQuantity;
+        this.avgPrice = newAvgPrice;
+    }
+
+    public void updateForSell(int sellQuantity) {
+
+        if (sellQuantity > this.quantity) {
+            throw new InvalidSellQuantityException(this.quantity);
+        }
+
+        this.quantity -= sellQuantity;
     }
 }

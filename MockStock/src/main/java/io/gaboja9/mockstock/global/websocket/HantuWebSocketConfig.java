@@ -13,7 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 @Configuration
 @EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
+public class HantuWebSocketConfig implements WebSocketConfigurer {
 
     @Value("${hantu-openapi.websocket-uri:ws://ops.koreainvestment.com:31000}")
     private String websocketUri;
@@ -39,7 +39,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public HantuWebSocketConnectionManager HantuWebSocketConnectionManager(
             WebSocketClient webSocketClient,
             HantuWebSocketHandler handler,
-            WebSocketSessionManager webSocketEventService) {
+            HantuWebSocketSessionManager webSocketEventService) {
 
         HantuWebSocketConnectionManager connectionManager =
                 new HantuWebSocketConnectionManager(

@@ -1,5 +1,6 @@
 package io.gaboja9.mockstock.domain.payments.controller;
 
+import io.gaboja9.mockstock.domain.auth.dto.MembersDetails;
 import io.gaboja9.mockstock.domain.payments.dto.KakaoPayApproveResponse;
 import io.gaboja9.mockstock.domain.payments.dto.KakaoPayReadyResponse;
 import io.gaboja9.mockstock.domain.payments.dto.PaymentRequest;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,12 +24,11 @@ public class KakaoPayController implements KakaoPayControllerSpec {
     @PostMapping("/ready")
     @Override
     public ResponseEntity<PaymentResponse> paymentReady(
-            @Valid @RequestBody PaymentRequest request) {
+            @Valid @RequestBody PaymentRequest request,
+            @AuthenticationPrincipal MembersDetails membersDetails) {
         try {
-            Long memberId = 1L;
-
             KakaoPayReadyResponse response =
-                    kakaoPayService.paymentReady(memberId, request.getChargeAmount());
+                    kakaoPayService.paymentReady(membersDetails.getId(), request.getChargeAmount());
 
             return ResponseEntity.ok(PaymentResponse.success("결제 준비 완료", response));
         } catch (Exception e) {

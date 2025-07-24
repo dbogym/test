@@ -1,5 +1,6 @@
 package io.gaboja9.mockstock.domain.members.controller;
 
+import io.gaboja9.mockstock.domain.auth.dto.MembersDetails;
 import io.gaboja9.mockstock.domain.mails.dto.response.MailsResponseDto;
 import io.gaboja9.mockstock.domain.mails.service.MailsService;
 import io.gaboja9.mockstock.domain.members.dto.request.MemosCreateRequestDto;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,8 +39,10 @@ public class MembersController implements MembersControllerSpec {
     private final MailsService mailsService;
 
     @GetMapping("/info")
-    public ResponseEntity<MemberInfoDto> getMemberInfo() {
-        Long currentId = 1L; // TODO: Security 도입 시 현재 로그인한 유저 ID 사용
+    public ResponseEntity<MemberInfoDto> getMemberInfo(
+            @AuthenticationPrincipal MembersDetails membersDetails) {
+
+        Long currentId = membersDetails.getId();
 
         PortfoliosResponseDto portfolios = portfoliosService.getPortfolios(currentId);
 
@@ -48,9 +52,10 @@ public class MembersController implements MembersControllerSpec {
     }
 
     @GetMapping("/portfolios")
-    public ResponseEntity<PortfoliosResponseDto> getPortfolios() {
-        // TODO : Security 도입되면 현재 로그인한 유저 id를 불러오는 것으로 수정
-        Long currentId = 1L;
+    public ResponseEntity<PortfoliosResponseDto> getPortfolios(
+            @AuthenticationPrincipal MembersDetails membersDetails) {
+
+        Long currentId = membersDetails.getId();
 
         PortfoliosResponseDto portfolios = portfoliosService.getPortfolios(currentId);
 
@@ -59,10 +64,11 @@ public class MembersController implements MembersControllerSpec {
 
     @GetMapping("/trades")
     public ResponseEntity<Page<TradesResponseDto>> getTrades(
+            @AuthenticationPrincipal MembersDetails membersDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Long currentId = 1L; // TODO: 시큐리티 적용 예정
+        Long currentId = membersDetails.getId();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<TradesResponseDto> trades = tradesService.getTrades(currentId, pageable);
 
@@ -71,11 +77,12 @@ public class MembersController implements MembersControllerSpec {
 
     @GetMapping("/trades/search")
     public ResponseEntity<Page<TradesResponseDto>> getTradesWithOption(
+            @AuthenticationPrincipal MembersDetails membersDetails,
             @Valid TradesRequestDto dto,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Long currentId = 1L;
+        Long currentId = membersDetails.getId();
 
         if ((dto.getStockCode() == null || dto.getStockCode().isBlank())
                 && (dto.getStockName() == null || dto.getStockName().isBlank())) {
@@ -91,10 +98,11 @@ public class MembersController implements MembersControllerSpec {
     }
 
     @PostMapping("/memos")
-    public ResponseEntity<String> createMemos(@Valid @RequestBody MemosCreateRequestDto dto) {
+    public ResponseEntity<String> createMemos(
+            @Valid @RequestBody MemosCreateRequestDto dto,
+            @AuthenticationPrincipal MembersDetails membersDetails) {
 
-        // TODO : Security 도입되면 현재 로그인한 유저 id를 불러오는 것으로 수정
-        Long currentId = 1L;
+        Long currentId = membersDetails.getId();
 
         membersService.createMemo(currentId, dto);
 
@@ -102,10 +110,10 @@ public class MembersController implements MembersControllerSpec {
     }
 
     @GetMapping("/memos")
-    public ResponseEntity<MemoResponseDto> getMemos() {
+    public ResponseEntity<MemoResponseDto> getMemos(
+            @AuthenticationPrincipal MembersDetails membersDetails) {
 
-        // TODO : Security 도입되면 현재 로그인한 유저 id를 불러오는 것으로 수정
-        Long currentId = 1L;
+        Long currentId = membersDetails.getId();
 
         MemoResponseDto memo = membersService.getMemo(currentId);
 
@@ -114,12 +122,12 @@ public class MembersController implements MembersControllerSpec {
 
     @GetMapping("/mails")
     public ResponseEntity<Page<MailsResponseDto>> getMails(
+            @AuthenticationPrincipal MembersDetails membersDetails,
             @RequestParam(required = false) Boolean unread,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        // TODO : Security 도입되면 현재 로그인한 유저 id를 불러오는 것으로 수정
-        Long currentId = 1L;
+        Long currentId = membersDetails.getId();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         if (unread == null) {
@@ -133,10 +141,10 @@ public class MembersController implements MembersControllerSpec {
     }
 
     @PostMapping("/bankruptcy")
-    public ResponseEntity<Void> declareBankruptcy() {
+    public ResponseEntity<Void> declareBankruptcy(
+            @AuthenticationPrincipal MembersDetails membersDetails) {
 
-        // TODO : Security 도입되면 현재 로그인한 유저 id를 불러오는 것으로 수정
-        Long currentId = 1L;
+        Long currentId = membersDetails.getId();
 
         membersService.processBankruptcy(currentId);
         return ResponseEntity.noContent().build();

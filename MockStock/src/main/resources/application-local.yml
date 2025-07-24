@@ -95,7 +95,7 @@ management:
         enabled: true
 
 hantu-openapi:
-  domain: https://openapivts.koreainvestment.com:29443
+  domain: https://openapi.koreainvestment.com:9443
   appkey: ${HANTU_APPKEY}
   appsecret: ${HANTU_APPSECRET}
 
@@ -153,4 +153,5 @@ logging:
     io.github.mockstock: DEBUG
     org.springframework.web: DEBUG
     org.springframework.web.client: DEBUG
+    org.springframework.web.SimpLogging: INFO
 

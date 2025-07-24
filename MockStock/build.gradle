@@ -53,6 +53,8 @@ dependencies {
 
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    implementation 'org.springframework.security:spring-security-messaging'
+
 
 }
 

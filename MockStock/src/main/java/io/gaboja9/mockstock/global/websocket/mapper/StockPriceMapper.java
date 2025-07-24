@@ -12,6 +12,9 @@ public class StockPriceMapper {
                 .currentPrice(parseInt(fields[2]))
                 .dayOverDayPercent(parseDouble(fields[5]))
                 .tradeVolume(parseLong(fields[12]))
+                .highPrice(parseInt(fields[8])) // 고가 (STCK_HGPR)
+                .lowPrice(parseInt(fields[9])) // 저가 (STCK_LWPR)
+                .cumulativeVolume(parseLong(fields[13])) // 누적 거래량 (ACML_VOL)
                 .build();
     }
 

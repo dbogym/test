@@ -15,7 +15,7 @@ public class HantuWebSocketConnectionManager extends WebSocketConnectionManager 
 
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> heartbeatTask;
-    private final WebSocketSessionManager sessionManager;
+    private final HantuWebSocketSessionManager sessionManager;
     private final HantuWebSocketHandler webSocketHandler;
 
     private volatile boolean running = false;
@@ -24,7 +24,7 @@ public class HantuWebSocketConnectionManager extends WebSocketConnectionManager 
             WebSocketClient client,
             HantuWebSocketHandler webSocketHandler,
             String uriTemplate,
-            WebSocketSessionManager sessionManager) {
+            HantuWebSocketSessionManager sessionManager) {
         super(client, webSocketHandler, uriTemplate);
         this.scheduler = new ScheduledThreadPoolExecutor(1);
         this.sessionManager = sessionManager;
